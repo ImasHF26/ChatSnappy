@@ -47,7 +47,7 @@ export default function SetAvatar() {
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
-      toast.error("Please select an avatar", toastOptions);
+      toast.error("SVP Choisir votre avatar", toastOptions);
       return;
     }
 
@@ -115,7 +115,7 @@ const Container = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 3rem;
-  background-color: #131324;
+  background-color: #0f2027; /* Updated */
   height: 100vh;
   width: 100vw;
 
@@ -154,12 +154,12 @@ const Container = styled.div`
     }
 
     .selected {
-      border: 0.4rem solid #4e0eff;
+      border: 0.4rem solid #00c6ff; /* Updated */
     }
   }
 
   .submit-btn {
-    background-color: #4e0eff;
+    background-color: #00c6ff; /* Updated */
     color: white;
     padding: 1rem 2rem;
     border: none;
@@ -170,7 +170,7 @@ const Container = styled.div`
     text-transform: uppercase;
 
     &:hover {
-      background-color: #3c0edc;
+      background-color: #0072ff; /* Updated */
     }
   }
 `;
