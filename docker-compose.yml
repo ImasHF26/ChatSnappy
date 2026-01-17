@@ -1,29 +1,66 @@
-version: '3.8'
+version: "3.8"
+
 services:
   front:
     build: ./public
     container_name: front
-    ports:
-      - 3000:3000
-    networks:
-      - local-net
+    expose:
+      - "3000"
+    networks: [local-net]
+
   api:
     build: ./server
     container_name: api
-    ports:
-      - 5000:5000
-    networks:
-      - local-net
-  mongo:
-    build: ./mongodb 
-    container_name: chat_mongodb
+    expose:
+      - "5000"
+    environment:
+      - CB_CONNSTR=couchbase://couchbase
+      - CB_USERNAME=Administrator
+      - CB_PASSWORD=Password123!
+      - CB_BUCKET=app
+      - CB_SCOPE=_default
+      - CB_USERS_COLLECTION=users
+      - CB_MESSAGES_COLLECTION=messages
+    depends_on:
+      - couchbase-init
+    networks: [local-net]
+
+  couchbase:
+    image: couchbase:community-8.0.0
+    container_name: db-couchbase_chat
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "8091:8091"
     volumes:
-      - ./mongodb/data:/data/db
-    networks:
-      - local-net
+      - ./couchbase/data:/opt/couchbase/var
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'echo > /dev/tcp/127.0.0.1/8091'"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+    networks: [local-net]
+
+  couchbase-init:
+    image: couchbase:community-8.0.0
+    container_name: couchbase-init
+    depends_on:
+      couchbase:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/init/init.sh"]
+    volumes:
+      - ./couchbase/init:/init:ro
+    environment:
+      - CB_HOST=couchbase
+      - CB_CLUSTER_NAME=chat-cluster
+      - CB_USERNAME=Administrator
+      - CB_PASSWORD=Password123!
+      - CB_BUCKET=app
+      - CB_RAMSIZE=512
+      - CB_SCOPE=_default
+      - CB_USERS_COLLECTION=users
+      - CB_MESSAGES_COLLECTION=messages
+    networks: [local-net]
+    restart: "no"
 
   nginx:
     image: nginx:latest
@@ -32,15 +69,17 @@ services:
       - "8080:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - local-net
+    depends_on:
+      - front
+      - api
+    networks: [local-net]
 
   ngrok:
     image: ngrok/ngrok:latest
     container_name: ngrok
-    command: http nginx:80
-    environment:
-      - NGROK_AUTHTOKEN=2z12W3566n4MgvF7j6Y9EiIlQIT_6x1VNMym9tBWDMyUdfKCG
+    command: ["http", "nginx:80", "--log=stdout", "--log-level=info"]
+    env_file:
+      - .env
     depends_on:
       - nginx
     networks:
