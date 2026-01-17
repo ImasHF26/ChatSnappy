@@ -22,30 +22,11 @@ after the build is complete run the containers using the following command
 ```shell
 docker compose up -d
 ```
-now open localhost:3000 in your browser.
+
 
 #### Ngrok
 
-To get the public domain provided by Ngrok do the following :
+Get the NGROK_AUTHTOKEN from Ngrok and put in .env.
 
-```shell
-docker exec -it chat_mongodb bash
-```
 
-Then curl Ngrok tunnels
 
-```shell
-curl http://ngrok:4040/api/tunnels
-```
-
-Get the link and replace host variable in this path "public\src\utils\APIRoutes.js"
-
-Then do the following :
-
-```shell
-docker-compose down front
-```
-
-```shell
-docker-compose up front --build -d
-```
