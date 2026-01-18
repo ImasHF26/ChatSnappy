@@ -28,5 +28,11 @@ docker compose up -d
 
 Get the NGROK_AUTHTOKEN from Ngrok and put in .env.
 
+Then curl Ngrok tunnels
+
+```shell
+docker run --rm --network chatsnappy_local-net curlimages/curl:8.5.0 -s http://ngrok:4040/api/tunnels
+```
+
 
 
